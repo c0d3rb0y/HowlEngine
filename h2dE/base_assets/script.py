@@ -39,4 +39,20 @@ remove("hahaobj")
 text("ok that was the engine test cool", "endtxt", 100, 180)
 time.sleep(5)
 remove("endtxt")
+text("now u can move this doge across de scren", "end2txt", 100, 180)
+sprite("h2dE/base_assets/dogebread.png", "dogebread", 100, 160)
+while GetRunning() == 1:
+    kd = GetKeysDown()
+    if "r" in kd:
+        move("dogebread", getCoords("dogebread")[0]+0.001, getCoords("dogebread")[1])
+
+    if "l" in kd:
+        move("dogebread", getCoords("dogebread")[0]-0.001, getCoords("dogebread")[1])
+    
+    if "u" in kd:
+        move("dogebread", getCoords("dogebread")[0], getCoords("dogebread")[1]-0.001)
+
+    if "d" in kd:
+        move("dogebread", getCoords("dogebread")[0], getCoords("dogebread")[1]+0.001)
 stop()
+quit()
