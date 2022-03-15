@@ -5,33 +5,44 @@ import threading
 import time
 import colorama
 
+global dirname
 global screen
 global background
 global objs
 global run
+global colliders
+global keys
+global scriptsRunning
 
-global keysDown
-
+scriptsRunning = 0
+dirname = os.path.dirname(__file__)
 objs = []
-keysDown = []
+colliders = []
 
 class log():
-    colorama.init()
     """Logging 4 HWL Engine"""
+    colorama.init()
     def warn(msg):
-        print(colorama.Fore.YELLOW + "[" + str(int(time.time())) + "] " + msg + colorama.Style.RESET)
+        """Howl Engine Logger - Warn"""
+        print(colorama.Fore.YELLOW +"WARN"+colorama.Fore.LIGHTBLUE_EX +" [" + str(int(time.time())) + "] "  + colorama.Fore.YELLOW +  msg + colorama.Fore.WHITE)
     def log(msg):
-        print("[" + str(int(time.time())) + "] " + msg)
+        """Howl Engine Logger - Log"""
+        print(colorama.Fore.LIGHTBLUE_EX + "[" + str(int(time.time())) + "] "  + colorama.Fore.WHITE + msg)
 
-def GetKeysDown():
-    return keysDown
+def GetKeyDown(key):
+    if keys[key]:
+        return True
+    else:
+        return False
 
 def GetRunning():
     return run
 
 def script(path):
     """Runs a .py file. Can be any valid python, but accepts Howl Engine commands."""
-    exec(open(path).read())
+    exec("scrthrd"+str(scriptsRunning)+"""= threading.Thread(target=exec(open(path).read()))""")
+    exec("scrthrd"+str(scriptsRunning)+".daemon = True")
+    exec("scrthrd"+str(scriptsRunning)+"start()")
 
 def text(txt, objName, x, y):
     """Creates a TextObject at the given coordinates."""
@@ -79,7 +90,7 @@ def rotate(objName, rotation):
     """Rotates Sprite Objects."""
     if rotation >= 360:
         rotation = rotation - 360
-        log.warning("rotspr: WARN: Rotation bigger than 360!")
+        log.warn("rotspr: WARN: Rotation bigger than 360! Subtracting (attempt minimization)")
     global objs
     for x in objs:
         for y in x:
@@ -87,15 +98,15 @@ def rotate(objName, rotation):
                 x[2] = pygame.transform.rotate(x[2], rotation)
                 log.log("rotate spr: " + objName)
                 return
-    log.warning("rotspr: could not find obj")
+    log.warn("rotspr: could not find obj")
 
 def changeOrder(objName, pos):
     """Changes the ordering of the objects onscreen."""
     if pos > getObjAmount():
-        print("order: FATALERR: Cannot move out of list!")
+        log.warn("order: Cannot move out of list!")
         return
     if pos < 0:
-        print("order: FATALERR: Sort position cannot be negative!")
+        log.warn("order: Sort position cannot be negative!")
         return
     global objs
     for x in objs:
@@ -105,7 +116,7 @@ def changeOrder(objName, pos):
                 objs.remove(x)
                 log.log("sort obj: " + objName)
                 return
-    log.warning("COULD NOT SORT OBJECT " + objName)
+    log.warn("COULD NOT SORT OBJECT " + objName)
 
 def stop():
     """Stop application."""
@@ -113,6 +124,9 @@ def stop():
     global objs
     run = 0
     objs = []
+    pygame.display.quit()
+    pygame.quit()
+    quit()
 
 def remove(objName):
     """Remove object based on object name you initialized it as."""
@@ -125,7 +139,7 @@ def remove(objName):
                 objs.remove(x)
                 log.log("yeet obj: " + objName)
                 return
-    log.warning("COULD NOT YEET OBJECT " + objName)
+    log.warn("COULD NOT YEET OBJECT " + objName)
 
 
 
@@ -136,6 +150,7 @@ def init(w, h, bg, fps):
     global screen
     global background
     global objs
+    global keys
     global run
     pygame.init()
     pygame.font.init()
@@ -156,32 +171,7 @@ def init(w, h, bg, fps):
         for event in pygame.event.get():
             if event.type == QUIT:
                 stop()
-                quit()
         keys=pygame.key.get_pressed()
-        try:
-            keysDown.remove("r") 
-        except:
-            pass
-        try:
-            keysDown.remove("l") 
-        except:
-            pass
-        try:
-            keysDown.remove("u") 
-        except:
-            pass
-        try:
-            keysDown.remove("d") 
-        except:
-            pass
-        if keys[K_LEFT]:
-            keysDown.append("l")
-        if keys[K_RIGHT]:
-            keysDown.append("r")
-        if keys[K_UP]:
-            keysDown.append("u")
-        if keys[K_DOWN]:
-            keysDown.append("d")
         screen.blit(background, (0, 0))
         for x in objs:
             screen.blit(x[2], (x[3], x[4]))
@@ -192,6 +182,4 @@ def init(w, h, bg, fps):
     pygame.quit()
 
 if __name__ == '__main__':
-    script("h2dE/base_assets/script.py")
-
-    
+    script(os.path.join(dirname, "base_assets/script.py"))
