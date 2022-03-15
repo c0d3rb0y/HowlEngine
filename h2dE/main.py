@@ -9,6 +9,7 @@ global dirname
 global screen
 global background
 global objs
+global locktick
 global run
 global keys
 global scriptsRunning
@@ -16,6 +17,7 @@ global scriptsRunning
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
+locktick = True
 
 class log():
     """Logging 4 HWL Engine"""
