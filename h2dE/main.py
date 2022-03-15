@@ -196,6 +196,6 @@ def init(w, h, bg, fps):
         
 
     pygame.quit()
-
+    #I contribute a lot
 if __name__ == '__main__':
     script(os.path.join(dirname, "base_assets/script.py"))
