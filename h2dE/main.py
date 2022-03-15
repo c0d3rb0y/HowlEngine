@@ -28,15 +28,18 @@ class log():
         print(colorama.Fore.LIGHTBLUE_EX + "[" + str(int(time.time())) + "] "  + colorama.Fore.WHITE + msg)
 
 def GetKeyDown(key):
+    """Check if a key is down (pygame key format, i.e. K_LEFT for left arrow)"""
     if keys[key]:
         return True
     else:
         return False
 
 def GetRunning():
+    """Check if the program is running. It's here and I don't know why, but I'd rather write this description than delete it."""
     return run
 
 def GetCollision(obj1n, obj2n):
+    """Check for collision between 2 objects (by name)"""
     global objs
     for obj in objs:
         if obj[1] == obj1n:
@@ -70,6 +73,7 @@ def text(txt, objName, x, y):
     objs.append(["text", objName, rendered, x, y])
 
 def getCoords(objName):
+    """Get coordinates of object by name."""
     global objs
     for obj in objs:
         if obj[1] == objName:
@@ -158,9 +162,7 @@ def remove(objName):
 
 
 def init(w, h, bg, fps):
-    """Start up window N stuff! 
-    bg color format is like this btw: (R, G, B)
-    DO NOT FORGET PARENTHESES"""
+    """init window, bg color format is a tuple btw. for examplez, 1920 1080 (0, 0, 0) 60 for 60fps black bg 1080p"""
     global screen
     global background
     global objs
