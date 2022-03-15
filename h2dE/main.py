@@ -170,6 +170,7 @@ def init(w, h, bg, fps):
     global objs
     global keys
     global run
+    global locktick
     pygame.init()
     pygame.font.init()
     screen = pygame.display.set_mode((w, h))
@@ -190,11 +191,13 @@ def init(w, h, bg, fps):
             if event.type == QUIT:
                 stop()
         keys=pygame.key.get_pressed()
+        locktick = False
         screen.blit(background, (0, 0))
         for x in objs:
             screen.blit(x[2], (x[3], x[4]))
         clock.tick(fps)
         pygame.display.flip()
+        locktick = True
         
 
     pygame.quit()

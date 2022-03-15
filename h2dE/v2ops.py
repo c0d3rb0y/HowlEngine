@@ -21,5 +21,7 @@ def moveNONASYNC(objName, x, y, seconds):
     yM = dist[1]/100
     for x in range(1, 100):
         time.sleep(0.01)
+        while locktick == True:
+            time.sleep(0)
         objs[i][3] += xM
         objs[i][4] += yM
