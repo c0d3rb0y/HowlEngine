@@ -126,7 +126,7 @@ def Rotate(objName, rotation):
 
 def ChangeOrder(objName, pos):
     """Changes the ordering of the objects onscreen."""
-    if pos > getObjAmount():
+    if pos > GetObjAmount():
         log.warn("order: Cannot move out of list!")
         return
     if pos < 0:
@@ -192,7 +192,7 @@ def init(w, h, bg, fps):
     while run == 1:
         for event in pygame.event.get():
             if event.type == QUIT:
-                stop()
+                Stop()
         keys=pygame.key.get_pressed()
         screen.blit(background, (0, 0))
         for x in objs:
