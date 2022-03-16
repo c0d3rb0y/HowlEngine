@@ -4,7 +4,7 @@ import time
 import math
 import threading
 
-def moveT(objName, x, y, seconds):
+def MoveT(objName, x, y, seconds):
     """Move object over time."""
     mt = threading.Thread(target=moveNONASYNC, args=(objName, x, y, seconds))
     mt.start()
@@ -22,8 +22,6 @@ def moveNONASYNC(objName, x, y, seconds):
     yM = dist[1]/100
     for x in range(1, 100):
         time.sleep(0.01)
-        while locktick == False:
-            print("ltfalse")
         objs[i][3] += xM
         objs[i][4] += yM
     log.log("move/time: completed")

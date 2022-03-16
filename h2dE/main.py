@@ -17,7 +17,6 @@ global scriptsRunning
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
-locktick = True
 
 class log():
     """Logging 4 HWL Engine"""
@@ -57,13 +56,18 @@ def GetCollision(obj1n, obj2n):
             break
     return pygame.Rect.colliderect(x1, x2)
 
-def script(path):
+def PlayAudio(path):
+    """Play audio file by path."""
+    pygame.mixer.Sound.play(pygame.mixer.Sound(path))
+    pygame.mixer.music.stop()
+
+def Script(path):
     """Runs a .py file. Can be any valid python, but accepts Howl Engine commands."""
     exec("scrthrd"+str(scriptsRunning)+"""= threading.Thread(target=exec(open(path).read()))""")
     exec("scrthrd"+str(scriptsRunning)+".daemon = True")
     exec("scrthrd"+str(scriptsRunning)+"start()")
 
-def text(txt, objName, x, y):
+def Text(txt, objName, x, y):
     """Creates a TextObject at the given coordinates."""
     global screen
     global background
@@ -74,7 +78,7 @@ def text(txt, objName, x, y):
     log.log("init textobj: " + objName)
     objs.append(["text", objName, rendered, x, y])
 
-def getCoords(objName):
+def GetCoords(objName):
     """Get coordinates of object by name."""
     global objs
     for obj in objs:
@@ -84,7 +88,7 @@ def getCoords(objName):
             break
     return [x, y]
 
-def sprite(path, objName, x, y):
+def Sprite(path, objName, x, y):
     """Creates a SpriteObject at the given coordinates."""
     global screen
     global background
@@ -93,7 +97,7 @@ def sprite(path, objName, x, y):
     log.log("init spriteobj: " + objName)
     objs.append(["sprite", objName, pygame.image.load(path), x, y])
 
-def move(objName, x, y):
+def Move(objName, x, y):
     """Moves an object to the specified X and Y coordinates."""
     global objs
     for obj in objs:
@@ -101,12 +105,12 @@ def move(objName, x, y):
             obj[3]=x
             obj[4]=y
 
-def getObjAmount():
+def GetObjAmount():
     """Returns the amount of objects that are currently loaded."""
     global objs
     return len(objs)
 
-def rotate(objName, rotation):
+def Rotate(objName, rotation):
     """Rotates Sprite Objects."""
     if rotation >= 360:
         rotation = rotation - 360
@@ -120,7 +124,7 @@ def rotate(objName, rotation):
                 return
     log.warn("rotspr: could not find obj")
 
-def changeOrder(objName, pos):
+def ChangeOrder(objName, pos):
     """Changes the ordering of the objects onscreen."""
     if pos > getObjAmount():
         log.warn("order: Cannot move out of list!")
@@ -138,7 +142,7 @@ def changeOrder(objName, pos):
                 return
     log.warn("COULD NOT SORT OBJECT " + objName)
 
-def stop():
+def Stop():
     """Stop application."""
     global run
     global objs
@@ -148,7 +152,7 @@ def stop():
     pygame.quit()
     quit()
 
-def remove(objName):
+def Remove(objName):
     """Remove object based on object name you initialized it as."""
     global screen
     global background
@@ -170,7 +174,6 @@ def init(w, h, bg, fps):
     global objs
     global keys
     global run
-    global locktick
     pygame.init()
     pygame.font.init()
     screen = pygame.display.set_mode((w, h))
@@ -191,15 +194,14 @@ def init(w, h, bg, fps):
             if event.type == QUIT:
                 stop()
         keys=pygame.key.get_pressed()
-        locktick = False
         screen.blit(background, (0, 0))
         for x in objs:
+            log.log(str(x))
             screen.blit(x[2], (x[3], x[4]))
         clock.tick(fps)
         pygame.display.flip()
-        locktick = True
         
 
     pygame.quit()
 if __name__ == '__main__':
-    script(os.path.join(dirname, "base_assets/script.py"))
+    Script(os.path.join(dirname, "base_assets/script.py"))
