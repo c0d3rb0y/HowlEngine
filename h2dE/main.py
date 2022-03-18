@@ -269,4 +269,4 @@ def Init(w, h, bg, fps):
         pygame.display.flip()
     pygame.quit()
 if __name__ == '__main__':
-    Script(os.path.join(dirname, "base_assets/script.py"))
+    Script(os.path.join(dirname, "assets/game.py"))
