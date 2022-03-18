@@ -7,6 +7,9 @@ def MoveT(objName, x, y, seconds):
 
 def moveNONASYNC(objName, x, y, seconds):
     """please nono use"""
+    global locktick
+    while locktick == False:
+        a = 1
     log.log("move/time: started")
     i = 0
     for obj in objs:

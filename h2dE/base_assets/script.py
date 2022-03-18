@@ -4,8 +4,7 @@ from v2ops import *
 runT = threading.Thread(target=Init, args=(1280, 720, (49,73,117), 60))
 runT.start()
 
-PlayAudio(os.path.join(dirname, "base_assets/sigmamale.mp3"))
-time.sleep(1)
+
 Sprite(os.path.join(dirname, "base_assets/dog.png"), "dogobj", 10, 10)
 Text("Hi", "hiobj", 60, 50)
 time.sleep(1)
@@ -42,6 +41,7 @@ Text("not touching random thingy", "end3txt", 100, 220)
 Sprite(os.path.join(dirname, "base_assets/test.bmp"), "randomthingy", 400, 300)
 Sprite(os.path.join(dirname, "base_assets/dogebread.png"), "dogebread", 100, 160)
 txtch = False
+PlayAudio(os.path.join(dirname, "base_assets/sigmamale.mp3"))
 while GetRunning() == 1:
     col = GetCollision("dogebread", "randomthingy")
     if col and txtch == False:

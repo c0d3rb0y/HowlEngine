@@ -4,7 +4,6 @@ from pygame.locals import *
 import threading
 import time
 import colorama
-import tracemalloc
 import playsound
 import asyncio
 
@@ -17,12 +16,11 @@ global run
 global keys
 global scriptsRunning
 
-tracemalloc.start()
-
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
 run = False
+locktick = False
 
 class log():
     """Logging 4 HWL Engine"""
@@ -85,6 +83,7 @@ def Text(txt, objName, x, y):
     global background
     global objs
     pygame.font.init()
+    
     font = pygame.font.Font(None, 36)
     rendered = font.render(txt, 1, (10, 10, 10))
     log.log("init textobj: " + objName)
@@ -112,6 +111,7 @@ def Sprite(path, objName, x, y):
 def Move(objName, x, y):
     """Moves an object to the specified X and Y coordinates."""
     global objs
+    
     for obj in objs:
         if obj[1] == objName:
             obj[3]=x
@@ -128,6 +128,7 @@ def Rotate(objName, rotation):
         rotation = rotation - 360
         log.warn("rotspr: WARN: Rotation bigger than 360! Subtracting (attempt minimization)")
     global objs
+    
     for x in objs:
         for y in x:
             if y == objName:
@@ -138,6 +139,7 @@ def Rotate(objName, rotation):
 
 def ChangeOrder(objName, pos):
     """Changes the ordering of the objects onscreen."""
+    
     if pos > GetObjAmount():
         log.warn("order: Cannot move out of list!")
         return
@@ -145,6 +147,7 @@ def ChangeOrder(objName, pos):
         log.warn("order: Sort position cannot be negative!")
         return
     global objs
+    
     for x in objs:
         for y in x:
             if y == objName:
@@ -169,6 +172,7 @@ def Remove(objName):
     global screen
     global background
     global objs
+    
     for x in objs:
         for y in x:
             if y == objName:
@@ -184,6 +188,7 @@ def Init(w, h, bg, fps):
     global screen
     global background
     global objs
+    global locktick
     global keys
     global run
     pygame.init()
@@ -205,10 +210,18 @@ def Init(w, h, bg, fps):
                 Stop()
         keys=pygame.key.get_pressed()
         screen.blit(background, (0, 0))
+        locktick = False
         for x in objs:
-            screen.blit(x[2], (x[3], x[4]))
+            try:
+                screen.blit(x[2], (x[3], x[4]))
+            except:
+                log.warn("blit: "+x[1]+" was locked! next time please unlock before blit!\n")
+                uls = x[2]
+                uls.unlock()
+                screen.blit(uls, (x[3], x[4]))
         clock.tick(fps)
         pygame.display.flip()
+        locktick = True
         
 
     pygame.quit()
