@@ -5,22 +5,20 @@ import threading
 import time
 import colorama
 import playsound
-import asyncio
 
 global dirname
 global screen
 global background
 global objs
-global locktick
 global run
 global keys
 global scriptsRunning
+global clock
 
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
 run = False
-locktick = False
 
 class log():
     """Logging 4 HWL Engine"""
@@ -75,6 +73,7 @@ def Script(path):
     scriptsRunning += 1
 
 def ScriptNT(path):
+    """For if some reason you need to run a script without threading."""
     exec(open(path).read())
 
 def Text(txt, objName, x, y):
@@ -181,15 +180,18 @@ def Remove(objName):
                 return
     log.warn("COULD NOT YEET OBJECT " + objName)
 
-
+def deltaTime():
+    """Multiply your movement by this for smooth."""
+    global clock
+    return clock.get_time()/1000.0
 
 def Init(w, h, bg, fps):
     """init window, bg color format is a tuple btw. for examplez, 1920 1080 (0, 0, 0) 60 for 60fps black bg 1080p"""
     global screen
     global background
     global objs
-    global locktick
     global keys
+    global clock
     global run
     pygame.init()
     screen = pygame.display.set_mode((w, h))
@@ -199,18 +201,22 @@ def Init(w, h, bg, fps):
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     background.fill(bg)
-
     screen.blit(background, (0, 0))
     pygame.display.flip()
+    
 
     run = True
     while run == True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 Stop()
+        
+        #important stuff (nonblit)
         keys=pygame.key.get_pressed()
+
+        #start blitting
         screen.blit(background, (0, 0))
-        locktick = False
+
         for x in objs:
             try:
                 screen.blit(x[2], (x[3], x[4]))
@@ -221,10 +227,7 @@ def Init(w, h, bg, fps):
                 screen.blit(uls, (x[3], x[4]))
         clock.tick(fps)
         pygame.display.flip()
-        locktick = True
-        
 
     pygame.quit()
 if __name__ == '__main__':
     Script(os.path.join(dirname, "base_assets/script.py"))
-    
