@@ -1,12 +1,10 @@
-import time
-import threading
 from main import *
 from v2ops import *
 
+runT = threading.Thread(target=Init, args=(1280, 720, (49,73,117), 60))
+runT.start()
 
-runThread = threading.Thread(target=init, args=(1280, 720, (49,73,117), 60))
-runThread.start()
-
+PlayAudio(os.path.join(dirname, "base_assets/sigmamale.mp3"))
 time.sleep(1)
 Sprite(os.path.join(dirname, "base_assets/dog.png"), "dogobj", 10, 10)
 Text("Hi", "hiobj", 60, 50)
@@ -55,13 +53,10 @@ while GetRunning() == 1:
             txtch = False
     if GetKeyDown(K_RIGHT):
         Move("dogebread", GetCoords("dogebread")[0]+0.005, GetCoords("dogebread")[1])
-
     if GetKeyDown(K_LEFT):
-        Move("dogebread", GetCoords("dogebread")[0]-0.005, GetCoords("dogebread")[1])
-        
+        Move("dogebread", GetCoords("dogebread")[0]-0.005, GetCoords("dogebread")[1])        
     if GetKeyDown(K_UP):
         Move("dogebread", GetCoords("dogebread")[0], GetCoords("dogebread")[1]-0.005)
 
     if GetKeyDown(K_DOWN):
         Move("dogebread", GetCoords("dogebread")[0], GetCoords("dogebread")[1]+0.005)
-stop()

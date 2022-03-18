@@ -1,8 +1,4 @@
 from main import *
-import pygame
-import time
-import math
-import threading
 
 def MoveT(objName, x, y, seconds):
     """Move object over time."""

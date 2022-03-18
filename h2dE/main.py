@@ -4,6 +4,9 @@ from pygame.locals import *
 import threading
 import time
 import colorama
+import tracemalloc
+import playsound
+import asyncio
 
 global dirname
 global screen
@@ -14,9 +17,12 @@ global run
 global keys
 global scriptsRunning
 
+tracemalloc.start()
+
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
+run = False
 
 class log():
     """Logging 4 HWL Engine"""
@@ -36,6 +42,7 @@ def GetKeyDown(key):
         return False
 
 def GetRunning():
+    global run
     """Check if the program is running. It's here and I don't know why, but I'd rather write this description than delete it."""
     return run
 
@@ -58,21 +65,26 @@ def GetCollision(obj1n, obj2n):
 
 def PlayAudio(path):
     """Play audio file by path."""
-    pygame.mixer.Sound.play(pygame.mixer.Sound(path))
-    pygame.mixer.music.stop()
+    playsound.playsound(path, False)
+    
 
 def Script(path):
     """Runs a .py file. Can be any valid python, but accepts Howl Engine commands."""
-    exec("scrthrd"+str(scriptsRunning)+"""= threading.Thread(target=exec(open(path).read()))""")
+    global scriptsRunning
+    exec("scrthrd"+str(scriptsRunning)+""" = threading.Thread(target=exec(open(\""""+path+"""\").read()))""")
     exec("scrthrd"+str(scriptsRunning)+".daemon = True")
-    exec("scrthrd"+str(scriptsRunning)+"start()")
+    exec("scrthrd"+str(scriptsRunning)+".start()")
+    scriptsRunning += 1
+
+def ScriptNT(path):
+    exec(open(path).read())
 
 def Text(txt, objName, x, y):
     """Creates a TextObject at the given coordinates."""
     global screen
     global background
     global objs
-    
+    pygame.font.init()
     font = pygame.font.Font(None, 36)
     rendered = font.render(txt, 1, (10, 10, 10))
     log.log("init textobj: " + objName)
@@ -167,7 +179,7 @@ def Remove(objName):
 
 
 
-def init(w, h, bg, fps):
+def Init(w, h, bg, fps):
     """init window, bg color format is a tuple btw. for examplez, 1920 1080 (0, 0, 0) 60 for 60fps black bg 1080p"""
     global screen
     global background
@@ -175,7 +187,6 @@ def init(w, h, bg, fps):
     global keys
     global run
     pygame.init()
-    pygame.font.init()
     screen = pygame.display.set_mode((w, h))
     pygame.display.set_caption('Howl Engine')
     clock = pygame.time.Clock()
@@ -187,16 +198,14 @@ def init(w, h, bg, fps):
     screen.blit(background, (0, 0))
     pygame.display.flip()
 
-    run = 1
-
-    while run == 1:
+    run = True
+    while run == True:
         for event in pygame.event.get():
             if event.type == QUIT:
                 Stop()
         keys=pygame.key.get_pressed()
         screen.blit(background, (0, 0))
         for x in objs:
-            log.log(str(x))
             screen.blit(x[2], (x[3], x[4]))
         clock.tick(fps)
         pygame.display.flip()
@@ -205,3 +214,4 @@ def init(w, h, bg, fps):
     pygame.quit()
 if __name__ == '__main__':
     Script(os.path.join(dirname, "base_assets/script.py"))
+    
