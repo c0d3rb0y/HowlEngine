@@ -4,6 +4,9 @@ from v2ops import *
 runT = threading.Thread(target=Init, args=(1280, 720, (49,73,117), 60))
 runT.start()
 
+while GetRunning() == False:
+    time.sleep(0)
+
 Sprite(os.path.join(dirname, "base_assets/dog.png"), "dogobj", 10, 10)
 Text("Hi", "hiobj", 60, 50)
 time.sleep(1)
@@ -36,32 +39,47 @@ while GetKeyDown(K_SPACE) == False:
     Text("ok that was the engine test cool", "endtxt", 100, 180)
     time.sleep(5)
     Remove("endtxt")
-    Text("now u can Move this doge across de scren", "end2txt", 100, 180)
-    Text("not touching random thingy", "end3txt", 100, 220)
+    Text("now u can move this doge across de scren (arrow keys), except no touch smiley face", "end2txt", 100, 180)
     Sprite(os.path.join(dirname, "base_assets/test.bmp"), "randomthingy", 400, 300)
     Sprite(os.path.join(dirname, "base_assets/dogebread.png"), "dogebread", 100, 160)
     txtch = False
     PlayAudio(os.path.join(dirname, "base_assets/sigmamale.mp3"))
     break
 while GetRunning() == 1:
+    r = False
+    l = False
+    u = False
+    d = False
     dTime = deltaTime()
-    col = GetCollision("dogebread", "randomthingy")
-    if col and txtch == False:
-        Remove("end3txt")
-        txtch = True
-    else:
-        if txtch and col == False:
-            Text("not touching random thingy", "end3txt", 100, 220)
-            txtch = False
     
+    if GetLMBDown():
+        Move("randomthingy", GetMousePosition()[0], GetMousePosition()[1])
+    
+    if GetRMBDown():
+        Move("randomthingy", 400, 300)
+
     if GetKeyDown(K_RIGHT) and (GetCoords("dogebread")[0] <= 1180):
+        r = True
         Move("dogebread", GetCoords("dogebread")[0]+0.5*dTime, GetCoords("dogebread")[1])
 
     if GetKeyDown(K_LEFT) and (GetCoords("dogebread")[0] >= 0):
+        l = True
         Move("dogebread", GetCoords("dogebread")[0]-0.5*dTime, GetCoords("dogebread")[1])    
 
     if GetKeyDown(K_UP) and (GetCoords("dogebread")[1] >= 000):
-        Move("dogebread", GetCoords("dogebread")[0], GetCoords("dogebread")[1]-0.5*dTime())
+        u = True
+        Move("dogebread", GetCoords("dogebread")[0], GetCoords("dogebread")[1]-0.5*dTime)
 
     if GetKeyDown(K_DOWN) and (GetCoords("dogebread")[1] <= 620):
-        Move("dogebread", GetCoords("dogebread")[0], GetCoords("dogebread")[1]+0.5*dTime())
+        d = True
+        Move("dogebread", GetCoords("dogebread")[0], GetCoords("dogebread")[1]+0.5*dTime)
+    
+    if GetCollision("dogebread", "randomthingy"):
+        if r == True:
+            Move("dogebread", GetCoords("dogebread")[0]-0.5*dTime, GetCoords("dogebread")[1])  
+        if l == True:
+            Move("dogebread", GetCoords("dogebread")[0]+0.5*dTime, GetCoords("dogebread")[1])   
+        if u == True:
+            Move("dogebread", GetCoords("dogebread")[0], GetCoords("dogebread")[1]+0.5*dTime)
+        if d == True:
+            Move("dogebread", GetCoords("dogebread")[0], GetCoords("dogebread")[1]-0.5*dTime)

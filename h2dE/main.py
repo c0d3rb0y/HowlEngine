@@ -1,3 +1,4 @@
+from curses.panel import version
 import os
 import pygame
 from pygame.locals import *
@@ -10,11 +11,14 @@ global dirname
 global screen
 global background
 global objs
+global ver
 global run
 global keys
 global scriptsRunning
 global clock
 
+
+ver = "2022.2"
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
@@ -29,6 +33,16 @@ class log():
     def log(msg):
         """Howl Engine Logger - Log"""
         print(colorama.Fore.LIGHTBLUE_EX + "[" + str(int(time.time())) + "] "  + colorama.Fore.WHITE + msg)
+
+def GetMousePosition():
+    mx, my = pygame.mouse.get_pos()
+    return (mx, my)
+
+def GetLMBDown():
+    return pygame.mouse.get_pressed()[0]
+
+def GetRMBDown():
+    return pygame.mouse.get_pressed()[2]
 
 def GetKeyDown(key):
     """Check if a key is down (pygame key format, i.e. K_LEFT for left arrow)"""
@@ -192,19 +206,43 @@ def Init(w, h, bg, fps):
     global objs
     global keys
     global clock
+    global ver
     global run
     pygame.init()
     screen = pygame.display.set_mode((w, h))
     pygame.display.set_caption('Howl Engine')
     clock = pygame.time.Clock()
 
+    introbg = pygame.Surface(screen.get_size())
+    introbg = introbg.convert()
+    introbg.fill((0, 0, 0))
+    ialpha = 0
+    i = 0
+    logo = pygame.image.load(os.path.join(dirname, "base_assets/howl.png"))
+    etxt = pygame.font.Font(None, 36).render("Howl Engine " + ver, 1, (255, 255, 255))
+    for x in range(0, fps*5):
+        i += 1
+        if i < 60:
+            ialpha += 4.25
+        if i > 240:
+            ialpha -= 4.25
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                Stop()
+        
+        logo.set_alpha(ialpha)
+        etxt.set_alpha(ialpha)
+
+        screen.blit(introbg, (0, 0))
+        screen.blit(logo, (w/2-(485/2), h/2-(540/2)))
+        screen.blit(etxt, (w/2-(pygame.font.Font(None, 36).size("Howl Engine " + ver)[0]/2),h-40))
+        clock.tick(fps)
+        pygame.display.flip()
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     background.fill(bg)
     screen.blit(background, (0, 0))
     pygame.display.flip()
-    
-
     run = True
     while run == True:
         for event in pygame.event.get():
@@ -213,10 +251,12 @@ def Init(w, h, bg, fps):
         
         #important stuff (nonblit)
         keys=pygame.key.get_pressed()
-
+        
+        
         #start blitting
         screen.blit(background, (0, 0))
 
+        #obj blitting
         for x in objs:
             try:
                 screen.blit(x[2], (x[3], x[4]))
@@ -227,7 +267,6 @@ def Init(w, h, bg, fps):
                 screen.blit(uls, (x[3], x[4]))
         clock.tick(fps)
         pygame.display.flip()
-
     pygame.quit()
 if __name__ == '__main__':
     Script(os.path.join(dirname, "base_assets/script.py"))
