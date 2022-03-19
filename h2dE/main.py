@@ -73,6 +73,16 @@ def GetCollision(obj1n, obj2n):
             break
     return pygame.Rect.colliderect(x1, x2)
 
+def GetTouchingMouse(name):
+    global objs
+    for obj in objs:
+        if obj[1] == name:
+            x1 = obj[2].get_rect()
+            x1.x = obj[3]
+            x1.y = obj[4]
+            break
+    return x1.collidepoint(pygame.mouse.get_pos())
+
 def PlayAudio(path):
     """Play audio file by path."""
     playsound.playsound(path, False)

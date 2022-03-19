@@ -16,7 +16,7 @@ def moveNONASYNC(objName, x, y, seconds):
     dist = (x - (objs[i][3]), (y - objs[i][4]))
     xM = dist[0]/100
     yM = dist[1]/100
-    for x in range(1, 100):
+    for n in range(1, 100):
         time.sleep(0.01)
         objs[i][3] += xM
         objs[i][4] += yM
