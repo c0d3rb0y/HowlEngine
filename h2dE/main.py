@@ -1,4 +1,5 @@
 from curses.panel import version
+from glob import glob
 import os
 import pygame
 from pygame.locals import *
@@ -14,6 +15,7 @@ global objs
 global ver
 global run
 global keys
+global showColliders
 global scriptsRunning
 global clock
 
@@ -23,6 +25,7 @@ scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
 run = False
+showColliders = False
 
 class log():
     """Logging 4 HWL Engine"""
@@ -37,6 +40,14 @@ class log():
 def GetMousePosition():
     mx, my = pygame.mouse.get_pos()
     return (mx, my)
+
+def GetDebugCollidersShown():
+    global showColliders
+    return showColliders
+
+def SetDebugCollidersShown(setto):
+    global showColliders
+    showColliders = setto
 
 def GetLMBDown():
     return pygame.mouse.get_pressed()[0]
@@ -217,6 +228,7 @@ def Init(w, h, bg, fps):
     global keys
     global clock
     global ver
+    global showColliders
     global run
     pygame.init()
     screen = pygame.display.set_mode((w, h))
@@ -270,13 +282,17 @@ def Init(w, h, bg, fps):
         for x in objs:
             try:
                 screen.blit(x[2], (x[3], x[4]))
+                if showColliders == True:
+                    pygame.draw.rect(x[2], (0, 255, 0), (0, 0, x[2].get_size()[0], x[2].get_size()[1]), 3)
             except:
-                log.warn("blit: "+x[1]+" was locked! next time please unlock before blit!\n")
+                log.warn("blit: "+x[1]+" was locked, or had some kind of blit error\n")
                 uls = x[2]
                 uls.unlock()
                 screen.blit(uls, (x[3], x[4]))
+                if showColliders == True:
+                    pygame.draw.rect(x[2], (255, 255, 0), (0, 0, x[2].get_size()[0], x[2].get_size()[1]), 3)
         clock.tick(fps)
         pygame.display.flip()
     pygame.quit()
 if __name__ == '__main__':
-    Script(os.path.join(dirname, "assets/game.py"))
+    Script(os.path.join(dirname, "base_assets/script.py"))
