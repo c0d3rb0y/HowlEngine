@@ -1,5 +1,4 @@
 from main import *
-from v2ops import *
 import random
 
 runT = threading.Thread(target=Init, args=(1280, 720, (176,223,229), 60))
@@ -10,7 +9,7 @@ while GetRunning() == False:
 
 while GetRunning() == True:
     Text("MONKE CLICKER", "title", 0, 0)
-    Text("A game where you click the monke, if click the monke 50 times u wins", "description", 0, 37)
+    Text("A game where you click the monke, if click the monke 50 times u wins. try to go as fast as u can", "description", 0, 37)
     Text("Click anywhere to start", "inst", 0, 72)
 
     lmb = GetLMBDown()
@@ -30,7 +29,7 @@ while GetRunning() == True:
             score += 1
             Remove("scor")
             Text("Score: " + str(score), "scor", 0, 37)
-            MoveT("monke", random.randrange(0, 1080), random.randrange(0, 520), 0.1)
+            Move("monke", random.randrange(0, 1080), random.randrange(0, 520))
             while GetLMBDown():
                 time.sleep(0)
 
