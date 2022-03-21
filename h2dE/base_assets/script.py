@@ -1,6 +1,6 @@
-from re import S
 from main import *
 from v2ops import *
+from particles import *
 
 runT = threading.Thread(target=Init, args=(1280, 720, (49,73,117), 60))
 runT.start()
@@ -12,6 +12,8 @@ Sprite(os.path.join(dirname, "base_assets/dog.png"), "dogobj", 10, 10)
 Text("Hi", "hiobj", 60, 50)
 time.sleep(1)
 while GetKeyDown(K_SPACE) == False:
+    #ParticleSystem("ps", 100, os.path.join(dirname, "base_assets/test.bmp"), 640, 360)
+    #will work eventually
     Rotate("hiobj", 90)
     MoveT("hiobj", 80, 70, 1)
     MoveT("dogobj", 30, 30, 1)

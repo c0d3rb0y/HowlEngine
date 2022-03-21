@@ -1,5 +1,3 @@
-from curses.panel import version
-from glob import glob
 import os
 import pygame
 from pygame.locals import *
@@ -38,21 +36,26 @@ class log():
         print(colorama.Fore.LIGHTBLUE_EX + "[" + str(int(time.time())) + "] "  + colorama.Fore.WHITE + msg)
 
 def GetMousePosition():
+    """returns x, y tuple"""
     mx, my = pygame.mouse.get_pos()
     return (mx, my)
 
 def GetDebugCollidersShown():
+    """more debug shit i needed, not really useful in games"""
     global showColliders
     return showColliders
 
 def SetDebugCollidersShown(setto):
+    """debug shit"""
     global showColliders
     showColliders = setto
 
 def GetLMBDown():
+    """idk, What do you think it does? returns bool"""
     return pygame.mouse.get_pressed()[0]
 
 def GetRMBDown():
+    """idk, What do you think it does? returns bool"""
     return pygame.mouse.get_pressed()[2]
 
 def GetKeyDown(key):
@@ -85,6 +88,7 @@ def GetCollision(obj1n, obj2n):
     return pygame.Rect.colliderect(x1, x2)
 
 def GetTouchingMouse(name):
+    """The name explains this pretty well. Returns bool"""
     global objs
     for obj in objs:
         if obj[1] == name:
