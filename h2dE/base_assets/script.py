@@ -12,8 +12,7 @@ Sprite(os.path.join(dirname, "base_assets/dog.png"), "dogobj", 10, 10)
 Text("Hi", "hiobj", 60, 50)
 time.sleep(1)
 while GetKeyDown(K_SPACE) == False:
-    #ParticleSystem("ps", 100, os.path.join(dirname, "base_assets/test.bmp"), 640, 360)
-    #will work eventually
+    asyncio.run(ParticleSystem("ps", 10, os.path.join(dirname, "base_assets/test.bmp"), 640, 360))
     Rotate("hiobj", 90)
     MoveT("hiobj", 80, 70, 1)
     MoveT("dogobj", 30, 30, 1)
