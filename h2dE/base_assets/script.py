@@ -2,9 +2,7 @@ from main import *
 from v2ops import *
 from particles import *
 
-runT = threading.Thread(target=Init, args=(1280, 720, (49,73,117), 60))
-runT.start()
-
+Init(1280, 720, (49,73,117), 60)
 while GetRunning() == False:
     time.sleep(0)
 
@@ -12,7 +10,7 @@ Sprite(os.path.join(dirname, "base_assets/dog.png"), "dogobj", 10, 10)
 Text("Hi", "hiobj", 60, 50)
 time.sleep(1)
 while GetKeyDown(K_SPACE) == False:
-    asyncio.run(ParticleSystem("ps", 10, os.path.join(dirname, "base_assets/test.bmp"), 640, 360))
+    ParticleSystem("ps", 100, os.path.join(dirname, "base_assets/test.bmp"), 640, 360, 10, 5)
     Rotate("hiobj", 90)
     MoveT("hiobj", 80, 70, 1)
     MoveT("dogobj", 30, 30, 1)
@@ -40,6 +38,8 @@ while GetKeyDown(K_SPACE) == False:
     Remove("hahaobj")
     Text("ok that was the engine test cool", "endtxt", 100, 180)
     time.sleep(5)
+    if GetKeyDown(K_d):
+        SetVolume(0.5)
     Remove("endtxt")
     Text("now u can move this doge across de scren (arrow keys), except no touch smiley face", "end2txt", 100, 180)
     Sprite(os.path.join(dirname, "base_assets/test.bmp"), "randomthingy", 400, 300)
@@ -78,7 +78,7 @@ while GetRunning() == 1:
     
     if GetKeyDown(K_a):
         SetDebugCollidersShown(True)
-
+    
     if GetCollision("dogebread", "randomthingy"):
         if r == True:
             Move("dogebread", GetCoords("dogebread")[0]-0.25*dTime, GetCoords("dogebread")[1])  

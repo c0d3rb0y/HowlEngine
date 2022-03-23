@@ -5,6 +5,7 @@ import threading
 import time
 import colorama
 import playsound
+import sys
 
 global dirname
 global screen
@@ -13,6 +14,8 @@ global objs
 global ver
 global run
 global keys
+global initT
+global volume
 global showColliders
 global scriptsRunning
 global clock
@@ -22,6 +25,7 @@ ver = "2022.2"
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
+volume = 1.0
 run = False
 showColliders = False
 
@@ -100,16 +104,19 @@ def GetTouchingMouse(name):
 
 def PlayAudio(path):
     """Play audio file by path."""
-    playsound.playsound(path, False)
+    global volume
+    sound = pygame.mixer.Sound(path)
+    sound.set_volume(volume)   # Now plays at 90% of full volume.
+    sound.play()
     
 
 def Script(path):
     """Runs a .py file. Can be any valid python, but accepts Howl Engine commands."""
     global scriptsRunning
+    scriptsRunning += 1
     exec("scrthrd"+str(scriptsRunning)+""" = threading.Thread(target=exec(open(\""""+path+"""\").read()))""")
     exec("scrthrd"+str(scriptsRunning)+".daemon = True")
     exec("scrthrd"+str(scriptsRunning)+".start()")
-    scriptsRunning += 1
 
 def ScriptNT(path):
     """For if some reason you need to run a script without threading."""
@@ -198,12 +205,24 @@ def ChangeOrder(objName, pos):
 def Stop():
     """Stop application."""
     global run
+    global scriptsRunning
     global objs
+    global initT
     run = 0
     objs = []
     pygame.display.quit()
     pygame.quit()
+    for x in range(0, scriptsRunning):
+        exec("scrthrd"+str(x)+"._stop()")
+    initT._stop()
+    sys.exit()
     quit()
+
+def SetVolume(vol):
+    """Set the volume of audio files."""
+    global volume
+    volume = vol
+
 
 def Remove(objName):
     """Remove object based on object name you initialized it as."""
@@ -224,8 +243,19 @@ def deltaTime():
     global clock
     return clock.get_time()/1000.0
 
-def Init(w, h, bg, fps):
+def Init(w, h , bg, fps):
     """init window, bg color format is a tuple btw. for examplez, 1920 1080 (0, 0, 0) 60 for 60fps black bg 1080p"""
+    global initT
+    initT = threading.Thread(target=InitNT, args=(w,h,bg,fps))
+    initT.daemon = True
+    initT.start()
+
+def SetTitle(title):
+    """Set the title of the window."""
+    pygame.display.set_caption(title)
+
+def InitNT(w, h, bg, fps):
+    """Non-threaded init. DON'T USE THIS"""
     global screen
     global background
     global objs
@@ -235,6 +265,7 @@ def Init(w, h, bg, fps):
     global showColliders
     global run
     pygame.init()
+    pygame.mixer.init()
     screen = pygame.display.set_mode((w, h))
     pygame.display.set_caption('Howl Engine')
     clock = pygame.time.Clock()
