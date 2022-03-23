@@ -39,7 +39,8 @@ while GetKeyDown(K_SPACE) == False:
     Text("ok that was the engine test cool", "endtxt", 100, 180)
     time.sleep(5)
     if GetKeyDown(K_d):
-        SetVolume(0.5)
+        SetVolume(0.0)
+        # debug flag
     Remove("endtxt")
     Text("now u can move this doge across de scren (arrow keys), except no touch smiley face", "end2txt", 100, 180)
     Sprite(os.path.join(dirname, "base_assets/test.bmp"), "randomthingy", 400, 300)
@@ -76,8 +77,9 @@ while GetRunning() == 1:
         d = True
         Move("dogebread", GetCoords("dogebread")[0], GetCoords("dogebread")[1]+0.25*dTime)
     
-    if GetKeyDown(K_a):
+    if GetKeyDown(K_d):
         SetDebugCollidersShown(True)
+        # debug flag again because why not lol
     
     if GetCollision("dogebread", "randomthingy"):
         if r == True:

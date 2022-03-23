@@ -6,10 +6,12 @@ global p_objs
 p_objs = []
 
 def ParticleSystem(name, amount, sprite, x, y, xchange, time):
+    """Creates a ParticleSystem at the given coordinates. Threaded."""
     pthread = threading.Thread(ParticleSystemNT(name, amount, sprite, x, y, xchange, time))
     pthread.start()
 
 def ParticleSystemNT(name, amount, sprite, x, y, xchange, tIme):
+    """Creates a ParticleSystem at the given coordinates. Non-threaded. Please do not use."""
     global p_objs
     p_objs.append(name)
     onl = []
@@ -41,5 +43,6 @@ def ParticleSystemNT(name, amount, sprite, x, y, xchange, tIme):
         Remove(n)
 
 def RemoveParticleSystem(name):
+    """Removes a ParticleSystem by name."""
     global p_objs
     p_objs.remove(name)

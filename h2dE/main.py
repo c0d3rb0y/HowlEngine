@@ -4,7 +4,6 @@ from pygame.locals import *
 import threading
 import time
 import colorama
-import playsound
 import sys
 
 global dirname
@@ -106,9 +105,8 @@ def PlayAudio(path):
     """Play audio file by path."""
     global volume
     sound = pygame.mixer.Sound(path)
-    sound.set_volume(volume)   # Now plays at 90% of full volume.
+    sound.set_volume(volume) #thanks copilot and overflow
     sound.play()
-    
 
 def Script(path):
     """Runs a .py file. Can be any valid python, but accepts Howl Engine commands."""
@@ -143,6 +141,20 @@ def GetCoords(objName):
             y=obj[4]
             break
     return [x, y]
+
+def GetRunningScripts():
+    """Returns the amount of scripts that are currently running. Copilot wrote this."""
+    global scriptsRunning
+    return scriptsRunning
+
+def GetVolume():
+    """Returns the current volume. Copilot said this was a good idea and added it themselves."""
+    global volume
+    return volume
+
+def SetIcon(path):
+    """Sets the icon of the window. Damn, copilot, I didn't even begin think of this one. Great job."""
+    pygame.display.set_icon(pygame.image.load(path))
 
 def Sprite(path, objName, x, y):
     """Creates a SpriteObject at the given coordinates."""
@@ -275,6 +287,7 @@ def InitNT(w, h, bg, fps):
     introbg.fill((0, 0, 0))
     ialpha = 0
     i = 0
+    SetIcon(os.path.join(dirname, "base_assets/howl.png"))
     logo = pygame.image.load(os.path.join(dirname, "base_assets/howl.png"))
     etxt = pygame.font.Font(None, 36).render("Howl Engine " + ver, 1, (255, 255, 255))
     for x in range(0, fps*5):
