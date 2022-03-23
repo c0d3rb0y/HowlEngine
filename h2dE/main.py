@@ -148,7 +148,7 @@ def GetRunningScripts():
     return scriptsRunning
 
 def GetVolume():
-    """Returns the current volume. Copilot said this was a good idea and added it themselves."""
+    """Returns the volume of the audio."""
     global volume
     return volume
 
