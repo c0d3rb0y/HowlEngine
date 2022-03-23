@@ -69,9 +69,9 @@ def GetKeyDown(key):
         return False
 
 def GetRunning():
-    global run
-    """Check if the program is running. It's here and I don't know why, but I'd rather write this description than delete it."""
-    return run
+     """Check if the program is running. It's here and I don't know why, but I'd rather write this description than delete it."""
+     global run
+     return run
 
 def GetCollision(obj1n, obj2n):
     """Check for collision between 2 objects (by name)"""
