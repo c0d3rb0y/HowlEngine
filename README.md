@@ -18,8 +18,6 @@ pygame
 
 threading
 
-playsound
-
 time
 
 colorama
