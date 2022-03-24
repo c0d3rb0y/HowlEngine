@@ -21,3 +21,9 @@ threading
 time
 
 colorama
+
+random
+
+numpy
+
+sys

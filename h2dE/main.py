@@ -5,6 +5,8 @@ import threading
 import time
 import colorama
 import sys
+import random
+import numpy as np
 
 global dirname
 global screen
@@ -16,15 +18,20 @@ global keys
 global initT
 global volume
 global showColliders
+global ambient
 global scriptsRunning
 global clock
+global illuminationList
 
 
 ver = "2022.2"
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
+illuminationList = []
 volume = 1.0
+ambient = 25
+lightingOn = True
 run = False
 showColliders = False
 
@@ -37,6 +44,63 @@ class log():
     def log(msg):
         """Howl Engine Logger - Log"""
         print(colorama.Fore.LIGHTBLUE_EX + "[" + str(int(time.time())) + "] "  + colorama.Fore.WHITE + msg)
+
+class particles():
+    """Particle module of h2dE"""
+
+    global p_objs
+    p_objs = []
+
+    def ParticleSystemNT(name, amount, sprite, x, y, xchange, tIme):
+            """Creates a ParticleSystem at the given coordinates. Non-threaded. Please do not use."""
+            global p_objs
+            p_objs.append(name)
+            onl = []
+            for a in range(0, amount):
+                onl.append(name+"_"+str(a))
+                Sprite(sprite, name+"_"+str(a), x, y)
+            i = 0
+            randfactors = []
+            rf2 = []
+            for c in range(0, len(onl)):
+                    rfactr = random.randint(-1*xchange, xchange)*0.5
+                    rf2c = random.randint(5,10)*0.1
+                    rf2.append(rf2c)
+                    randfactors.append(rfactr)
+            i = 0
+            while (name in p_objs) and (tIme > i):
+                for b in range(0, 100):
+                    time.sleep(0.001)
+                    for n in onl:
+                        i += 1
+                        if random.randint(0,10) == 5:
+                            Move(n, x, y)
+                        else:
+                            Move(n, GetCoords(n)[0]+randfactors[onl.index(n)], GetCoords(n)[1]-(2*rf2[onl.index(n)]))
+                for n in onl:
+                    Move(n, x, y)
+                i+=1
+            for n in onl:
+                Remove(n)
+
+    def ParticleSystem(name, amount, sprite, x, y, xchange, time):
+        """Creates a ParticleSystem at the given coordinates. Threaded."""
+        pthread = threading.Thread(particles.ParticleSystemNT(name, amount, sprite, x, y, xchange, time))
+        pthread.start()
+
+    def RemoveParticleSystem(name):
+        """Removes a ParticleSystem by name."""
+        global p_objs
+        p_objs.remove(name)
+
+def SetAmbient(val):
+    """Set the ambient light."""
+    global ambient
+    ambient = val
+
+def GetAmbient():
+    """Returns ambient light. thank u copilot"""
+    return ambient
 
 def GetMousePosition():
     """returns x, y tuple"""
@@ -148,7 +212,7 @@ def GetRunningScripts():
     return scriptsRunning
 
 def GetVolume():
-    """Returns the volume of the audio."""
+    """Returns the volume of the audio. Good one copilot."""
     global volume
     return volume
 
@@ -179,6 +243,32 @@ def GetObjAmount():
     global objs
     return len(objs)
 
+def GetObj(objName):
+    """Returns the object by name. Copilot wrote this. I don't know why."""
+    global objs
+    for obj in objs:
+        if obj[1] == objName:
+            return obj
+
+def GetObjByIndex(index):
+    """Returns the object by index in renderlist. I don't know who the hell would need such a thing, but guess what? Copilot decided it was time to make it."""
+    global objs
+    return objs[index]
+
+def howlBlit(objName):
+    """Blits a specific object by name. I don't know why you would use this, but I guess it's here."""
+    global objs
+    for obj in objs:
+        if obj[1] == objName:
+            screen.blit(obj[2], (obj[3], obj[4]))
+
+def SetBackground(path):
+    """Sets the background image, and also can cause that weird windows vista effect if it's not the right size... Thanks anyway, copilot."""
+    global background
+    global screen
+    background = pygame.image.load(path)
+    pygame.transform.scale(background, (screen.get_width(), screen.get_height()))
+
 def Rotate(objName, rotation):
     """Rotates Sprite Objects."""
     if rotation >= 360:
@@ -193,6 +283,11 @@ def Rotate(objName, rotation):
                 log.log("rotate spr: " + objName)
                 return
     log.warn("rotspr: could not find obj")
+
+def SwapDebugLightingOn():
+    """Flips the lighting mode, for debug reasons. Copilot wrote this."""
+    global lightingOn
+    lightingOn = not lightingOn
 
 def ChangeOrder(objName, pos):
     """Changes the ordering of the objects onscreen."""
@@ -214,6 +309,39 @@ def ChangeOrder(objName, pos):
                 return
     log.warn("COULD NOT SORT OBJECT " + objName)
 
+def GetDistance(obj1, obj2):
+    """Returns the distance between two objects. From github copilot"""
+    global objs
+    for x in objs:
+        for y in x:
+            if y == obj1:
+                x1 = x[3]
+                y1 = x[4]
+            if y == obj2:
+                x2 = x[3]
+                y2 = x[4]
+    return np.sqrt((x2-x1)**2 + (y2-y1)**2)
+
+def SetBrightness(obj, brightness):
+    global illuminationList
+    complete = 0
+    for x in illuminationList:
+        if x[0] == obj:
+            if x[1] == brightness:
+                complete = 1
+            else:
+                x[1] = brightness
+                complete = 1
+                log.log("illum: " + obj + " set to " + str(brightness))
+                break
+    if complete == 0:
+        illuminationList.append([obj, brightness])
+        log.log("illum: Added " + obj + " to illumination list")
+
+def GetDebugLightingEnabled():
+    global lightingOn
+    return lightingOn
+
 def Stop():
     """Stop application."""
     global run
@@ -228,13 +356,11 @@ def Stop():
         exec("scrthrd"+str(x)+"._stop()")
     initT._stop()
     sys.exit()
-    quit()
 
 def SetVolume(vol):
     """Set the volume of audio files."""
     global volume
-    volume = vol
-
+    volume = vol  
 
 def Remove(objName):
     """Remove object based on object name you initialized it as."""
@@ -272,6 +398,9 @@ def InitNT(w, h, bg, fps):
     global background
     global objs
     global keys
+    global lightingOn
+    global illuminationList
+    global ambient
     global clock
     global ver
     global showColliders
@@ -324,12 +453,26 @@ def InitNT(w, h, bg, fps):
         
         
         #start blitting
-        screen.blit(background, (0, 0))
+        try:
+            screen.blit(background, (0, 0))
+        except:
+            bguls = background
+            bguls.unlock()
+            screen.blit(bguls, (0, 0))
+            log.warn("blit: background is locked! how the high fructose corn syrup did you do that?")
 
         #obj blitting
         for x in objs:
             try:
-                screen.blit(x[2], (x[3], x[4]))
+                if lightingOn == True:
+                    limage = x[2].copy()
+                    limage.fill((ambient, ambient, ambient), special_flags=pygame.BLEND_RGB_ADD)
+                    for e in illuminationList:
+                        if x[1] in e:
+                            limage.fill((e[1], e[1], e[1]), special_flags=pygame.BLEND_RGB_ADD)
+                    screen.blit(limage, (x[3], x[4]))
+                else:
+                    screen.blit(x[2], (x[3], x[4]))
                 if showColliders == True:
                     pygame.draw.rect(x[2], (0, 255, 0), (0, 0, x[2].get_size()[0], x[2].get_size()[1]), 3)
             except:
