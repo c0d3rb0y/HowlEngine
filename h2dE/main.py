@@ -93,6 +93,54 @@ class particles():
         global p_objs
         p_objs.remove(name)
 
+class GameState():
+    """List of strings for defining current state. Can be used on its own, or for scene sorting."""
+
+    def __init__(self, current, all):  
+        if current in all:
+            self.current = current
+            self.all = all
+        else:
+            print("Failed to create GameState! Current state is not in provided list of states.")
+    
+    def setCurrent(self, state):
+        if state in self.all:
+            self.current = state
+        else:
+            print("Failed to set current state! State is not in provided list of states.")
+
+    def getCurrent(self):
+        return self.current
+    
+    def newState(self, state):
+        self.all.append(state)
+    
+    def deleteState(self, state):
+        self.all.remove(state)
+        
+class Scene():
+    """Instantly loadable list of objects."""
+
+    def __init__(self, name, objects):
+        self.name = name
+        self.objects = objects
+
+    def getName(self):
+        return self.name
+
+    def getObjects(self):
+        return self.objects
+    
+    def load(self):
+        ClearObjects()
+        for x in self.objects:
+            objs.append(x)
+
+def ClearObjects():
+    """Clears all objects"""
+    global objs
+    objs = []
+
 def SetAmbient(val):
     """Set the ambient light."""
     global ambient
@@ -184,6 +232,8 @@ def ScriptNT(path):
     """For if some reason you need to run a script without threading."""
     exec(open(path).read())
 
+
+
 def Text(txt, objName, x, y):
     """Creates a TextObject at the given coordinates."""
     global screen
@@ -195,6 +245,26 @@ def Text(txt, objName, x, y):
     rendered = font.render(txt, 1, (10, 10, 10))
     log.log("init textobj: " + objName)
     objs.append(["text", objName, rendered, x, y])
+
+def ReturnText(txt, objName, x, y):
+    """Returns a TextObject with the given properties."""
+    global screen
+    global background
+    global objs
+    pygame.font.init()
+    
+    font = pygame.font.Font(None, 36)
+    rendered = font.render(txt, 1, (10, 10, 10))
+    log.log("load textobj: " + objName)
+    return ["text", objName, rendered, x, y]
+
+def ReturnSprite(path, objName, x, y):
+    """Returns a SpriteObject with the given properties."""
+    global screen
+    global background
+    global objs
+    log.log("load spriteobj: " + objName)
+    return ["sprite", objName, pygame.image.load(path), x, y]
 
 def GetCoords(objName):
     """Get coordinates of object by name."""
@@ -244,14 +314,14 @@ def GetObjAmount():
     return len(objs)
 
 def GetObj(objName):
-    """Returns the object by name. Copilot wrote this. I don't know why."""
+    """Returns an object by name. Copilot wrote this. I don't know why."""
     global objs
     for obj in objs:
         if obj[1] == objName:
             return obj
 
 def GetObjByIndex(index):
-    """Returns the object by index in renderlist. I don't know who the hell would need such a thing, but guess what? Copilot decided it was time to make it."""
+    """Returns an object by index in renderlist. I don't know who the hell would need such a thing, but guess what? Copilot decided it was time to make it."""
     global objs
     return objs[index]
 
@@ -320,7 +390,44 @@ def GetDistance(obj1, obj2):
             if y == obj2:
                 x2 = x[3]
                 y2 = x[4]
-    return np.sqrt((x2-x1)**2 + (y2-y1)**2)
+    return pygame.math.Vector2(x1, y1).distance_to(pygame.math.Vector2(x2, y2))
+
+def GetAngle(obj1, obj2):
+    """Returns the angle between two objects. From github copilot"""
+    global objs
+    for x in objs:
+        for y in x:
+            if y == obj1:
+                x1 = x[3]
+                y1 = x[4]
+            if y == obj2:
+                x2 = x[3]
+                y2 = x[4]
+    return np.arctan2(y2-y1, x2-x1)
+
+def GetAngleToMouse(objName):
+    """Returns the angle between an object and the mouse. From copilot"""
+    global mouseX
+    global mouseY
+    global objs
+    for x in objs:
+        for y in x:
+            if y == objName:
+                x1 = x[3]
+                y1 = x[4]
+    return np.arctan2(mouseY-y1, mouseX-x1)
+
+def GetDistanceToMouse(objName):
+    """Returns the distance between an object and the mouse. Thanks copilot"""
+    global mouseX
+    global mouseY
+    global objs
+    for x in objs:
+        for y in x:
+            if y == objName:
+                x1 = x[3]
+                y1 = x[4]
+    return pygame.math.Vector2(x1, y1).distance_to(pygame.math.Vector2(mouseX, mouseY))
 
 def SetBrightness(obj, brightness):
     global illuminationList
