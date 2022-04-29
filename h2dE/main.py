@@ -7,6 +7,7 @@ import colorama
 import sys
 import random
 import numpy as np
+import traceback
 
 global dirname
 global screen
@@ -22,17 +23,21 @@ global ambient
 global scriptsRunning
 global clock
 global illuminationList
+global lightList
+global autoLight
 
 ver = "2022.2"
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
 illuminationList = []
+lightList = []
 volume = 1.0
 ambient = 25
 lightingOn = True
 run = False
 showColliders = False
+autoLight = True
 
 
 class log():
@@ -51,6 +56,8 @@ class log():
     def error(msg):
         """Howl Engine Logger - Error"""
         print(colorama.Fore.RED + "ERROR" + " [" + str(int(time.time())) + "] " + msg + colorama.Fore.WHITE)
+
+
 class particles():
     """Particle module of h2dE"""
 
@@ -101,7 +108,7 @@ class particles():
 
 
 class GameState():
-    """List of strings for defining current state. Can be used on its own, or for scene sorting."""
+    """List of strings for defining current state."""
 
     def __init__(self, current, all):
         if current in all:
@@ -211,9 +218,11 @@ def GetRunning():
     global run
     return run
 
+
 def GetTime():
     """Get the current time in seconds. This is a float."""
     return pygame.time.get_ticks() / 1000.0
+
 
 def GetCollision(obj1n, obj2n):
     """Check for collision between 2 objects (by name)"""
@@ -483,6 +492,7 @@ def GetDistanceToMouse(objName):
     return pygame.math.Vector2(x1, y1).distance_to(pygame.math.Vector2(mouseX, mouseY))
 
 
+
 def SetBrightness(obj, brightness):
     global illuminationList
     complete = 0
@@ -496,14 +506,27 @@ def SetBrightness(obj, brightness):
                 log.log("illum: " + obj + " set to " + str(brightness))
                 break
     if complete == 0:
-        illuminationList.append([obj, brightness])
-        log.log("illum: Added " + obj + " to illumination list")
+        log.warn("illum: " + obj + " not found")
+
+def MakeObjectLightInfluenced(obj, brightness):
+    global illuminationList
+    illuminationList.append([obj, brightness])
+    log.log("illum: " + obj + " added to illumlist")
+
+def MakeObjectLight(obj, brightness):
+    global illuminationList
+    global lightList
+    lightList.append([obj, brightness])
+    log.log("illum: " + obj + " added to lightlist")
 
 
 def GetDebugLightingEnabled():
     global lightingOn
     return lightingOn
 
+def AutolightToggle():
+    global autoLight
+    autoLight = not autoLight
 
 def Stop():
     """Stop application."""
@@ -574,6 +597,7 @@ def InitNT(w, h, bg, fps):
     global ver
     global showColliders
     global run
+    mult = 0.0000217013888889
     pygame.init()
     pygame.mixer.init()
     screen = pygame.display.set_mode((w, h))
@@ -639,6 +663,17 @@ def InitNT(w, h, bg, fps):
                     for e in illuminationList:
                         if x[1] in e:
                             limage.fill((e[1], e[1], e[1]), special_flags=pygame.BLEND_RGB_ADD)
+                    if autoLight:
+                        al = 0.0
+                        for a in lightList:
+
+                            al += 70 - (GetDistance(x[0], a[0])/(mult*(screen.get_width()*screen.get_height())))
+                        if al > 255:
+                            al = 255
+                    limage.fill((int(al), int(al), int(al)), special_flags=pygame.BLEND_RGB_ADD)
+                    for e in lightList:
+                        if x[1] in e:
+                            limage.fill((e[1], e[1], e[1]), special_flags=pygame.BLEND_RGB_ADD)
                     screen.blit(limage, (x[3], x[4]))
                 else:
                     screen.blit(x[2], (x[3], x[4]))
@@ -646,6 +681,7 @@ def InitNT(w, h, bg, fps):
                     pygame.draw.rect(x[2], (0, 255, 0), (0, 0, x[2].get_size()[0], x[2].get_size()[1]), 3)
             except:
                 log.warn("blit: " + x[1] + " was locked, or had some kind of blit error\n")
+                traceback.print_exc()
                 uls = x[2]
                 uls.unlock()
                 screen.blit(uls, (x[3], x[4]))
