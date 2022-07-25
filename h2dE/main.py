@@ -13,27 +13,27 @@ global dirname
 global screen
 global background
 global objs
-global ver
+global version
 global run
 global keys
-global initT
+global initThreaded
 global volume
 global showColliders
-global ambient
+global ambientLight
 global scriptsRunning
 global clock
 global illuminationList
 global lightList
 global autoLight
 
-ver = "2022.2"
+version = "2022.2"
 scriptsRunning = 0
 dirname = os.path.dirname(__file__)
 objs = []
 illuminationList = []
 lightList = []
 volume = 1.0
-ambient = 25
+ambientLight = 25
 lightingOn = True
 run = False
 showColliders = False
@@ -96,15 +96,15 @@ class particles():
         for n in onl:
             Remove(n)
 
-    def ParticleSystem(name, amount, sprite, x, y, xchange, time):
+    def ParticleSystem(objname, amount, sprite, x, y, xchange, time):
         """Creates a ParticleSystem at the given coordinates. Threaded."""
-        pthread = threading.Thread(particles.ParticleSystemNT(name, amount, sprite, x, y, xchange, time))
+        pthread = threading.Thread(particles.ParticleSystemNT(objname, amount, sprite, x, y, xchange, time))
         pthread.start()
 
-    def RemoveParticleSystem(name):
+    def RemoveParticleSystem(objname):
         """Removes a ParticleSystem by name."""
         global p_objs
-        p_objs.remove(name)
+        p_objs.remove(objname)
 
 
 class GameState():
@@ -168,13 +168,13 @@ def ClearObjects():
 
 def SetAmbient(val):
     """Set the ambient light."""
-    global ambient
-    ambient = val
+    global ambientLight
+    ambientLight = val
 
 
 def GetAmbient():
     """Returns ambient light. thank u copilot"""
-    return ambient
+    return ambientLight
 
 
 def GetMousePosition():
@@ -492,7 +492,6 @@ def GetDistanceToMouse(objName):
     return pygame.math.Vector2(x1, y1).distance_to(pygame.math.Vector2(mouseX, mouseY))
 
 
-
 def SetBrightness(obj, brightness):
     global illuminationList
     complete = 0
@@ -508,10 +507,12 @@ def SetBrightness(obj, brightness):
     if complete == 0:
         log.warn("illum: " + obj + " not found")
 
+
 def MakeObjectLightInfluenced(obj, brightness):
     global illuminationList
     illuminationList.append([obj, brightness])
     log.log("illum: " + obj + " added to illumlist")
+
 
 def MakeObjectLight(obj, brightness):
     global illuminationList
@@ -524,23 +525,25 @@ def GetDebugLightingEnabled():
     global lightingOn
     return lightingOn
 
+
 def AutolightToggle():
     global autoLight
     autoLight = not autoLight
+
 
 def Stop():
     """Stop application."""
     global run
     global scriptsRunning
     global objs
-    global initT
+    global initThreaded
     run = 0
     objs = []
     pygame.display.quit()
     pygame.quit()
     for x in range(0, scriptsRunning):
         exec("scrthrd" + str(x) + "._stop()")
-    initT._stop()
+    initThreaded._stop()
     sys.exit()
 
 
@@ -573,10 +576,9 @@ def deltaTime():
 
 def Init(w, h, bg, fps):
     """init window, bg color format is a tuple btw. for examplez, 1920 1080 (0, 0, 0) 60 for 60fps black bg 1080p"""
-    global initT
-    initT = threading.Thread(target=InitNT, args=(w, h, bg, fps))
-    initT.daemon = True
-    initT.start()
+    global initThreaded
+    initThreaded = threading.Thread(target=InitNT, args=(w, h, bg, fps))
+    initThreaded.start()
 
 
 def SetTitle(title):
@@ -592,9 +594,9 @@ def InitNT(w, h, bg, fps):
     global keys
     global lightingOn
     global illuminationList
-    global ambient
+    global ambientLight
     global clock
-    global ver
+    global version
     global showColliders
     global run
     mult = 0.0000217013888889
@@ -612,7 +614,7 @@ def InitNT(w, h, bg, fps):
     i = 0
     SetIcon(os.path.join(dirname, "base_assets/howl.png"))
     logo = pygame.image.load(os.path.join(dirname, "base_assets/howl.png"))
-    etxt = pygame.font.Font(None, 36).render("Howl Engine " + ver, 1, (255, 255, 255))
+    etxt = pygame.font.Font(None, 36).render("Howl Engine " + version, 1, (255, 255, 255))
     for x in range(0, fps * 5):
         i += 1
         if i < 60:
@@ -628,7 +630,7 @@ def InitNT(w, h, bg, fps):
 
         screen.blit(introbg, (0, 0))
         screen.blit(logo, (w / 2 - (485 / 2), h / 2 - (540 / 2)))
-        screen.blit(etxt, (w / 2 - (pygame.font.Font(None, 36).size("Howl Engine " + ver)[0] / 2), h - 40))
+        screen.blit(etxt, (w / 2 - (pygame.font.Font(None, 36).size("Howl Engine " + version)[0] / 2), h - 40))
         clock.tick(fps)
         pygame.display.flip()
     background = pygame.Surface(screen.get_size())
@@ -649,35 +651,34 @@ def InitNT(w, h, bg, fps):
         try:
             screen.blit(background, (0, 0))
         except:
-            bguls = background
-            bguls.unlock()
-            screen.blit(bguls, (0, 0))
+            unlockedBackground = background
+            unlockedBackground.unlock()
+            screen.blit(unlockedBackground, (0, 0))
             log.warn("blit: background is locked! how the high fructose corn syrup did you do that?")
 
         # obj blitting
         for x in objs:
             try:
-                if lightingOn == True:
-                    limage = x[2].copy()
-                    limage.fill((ambient, ambient, ambient), special_flags=pygame.BLEND_RGB_ADD)
+                if lightingOn:
+                    lightedImage = x[2].copy()
+                    lightedImage.fill((ambientLight, ambientLight, ambientLight), special_flags=pygame.BLEND_RGB_ADD)
                     for e in illuminationList:
                         if x[1] in e:
-                            limage.fill((e[1], e[1], e[1]), special_flags=pygame.BLEND_RGB_ADD)
+                            lightedImage.fill((e[1], e[1], e[1]), special_flags=pygame.BLEND_RGB_ADD)
                     if autoLight:
                         al = 0.0
                         for a in lightList:
-
-                            al += 70 - (GetDistance(x[0], a[0])/(mult*(screen.get_width()*screen.get_height())))
+                            al += 70 - (GetDistance(x[0], a[0]) / (mult * (screen.get_width() * screen.get_height())))
                         if al > 255:
                             al = 255
-                    limage.fill((int(al), int(al), int(al)), special_flags=pygame.BLEND_RGB_ADD)
+                    lightedImage.fill((int(al), int(al), int(al)), special_flags=pygame.BLEND_RGB_ADD)
                     for e in lightList:
                         if x[1] in e:
-                            limage.fill((e[1], e[1], e[1]), special_flags=pygame.BLEND_RGB_ADD)
-                    screen.blit(limage, (x[3], x[4]))
+                            lightedImage.fill((e[1], e[1], e[1]), special_flags=pygame.BLEND_RGB_ADD)
+                    screen.blit(lightedImage, (x[3], x[4]))
                 else:
                     screen.blit(x[2], (x[3], x[4]))
-                if showColliders == True:
+                if showColliders:
                     pygame.draw.rect(x[2], (0, 255, 0), (0, 0, x[2].get_size()[0], x[2].get_size()[1]), 3)
             except:
                 log.warn("blit: " + x[1] + " was locked, or had some kind of blit error\n")
@@ -685,7 +686,7 @@ def InitNT(w, h, bg, fps):
                 uls = x[2]
                 uls.unlock()
                 screen.blit(uls, (x[3], x[4]))
-                if showColliders == True:
+                if showColliders:
                     pygame.draw.rect(x[2], (255, 255, 0), (0, 0, x[2].get_size()[0], x[2].get_size()[1]), 3)
         clock.tick(fps)
         pygame.display.flip()
